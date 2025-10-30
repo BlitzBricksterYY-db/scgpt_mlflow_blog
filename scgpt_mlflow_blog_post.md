@@ -17,18 +17,38 @@ In this comprehensive guide, we'll walk through deploying ScGPT—a Foundation M
 
 ## Table of Contents
 
+### Part 1: Understanding and Preparation
 1. [What You'll Learn](#what-youll-learn)
 2. [Understanding ScGPT and the Challenge](#understanding-scgpt-and-the-challenge)
-3. [Setting Up the Environment](#setting-up-the-environment)
-4. [Creating the Custom PyFunc Model](#creating-the-custom-pyfunc-model)
-5. [Implementing the Preprocessing Pipeline](#implementing-the-preprocessing-pipeline)
-6. [Implementing the Predict Method](#implementing-the-predict-method)
-7. [Solving the Serialization Challenge](#solving-the-serialization-challenge)
-8. [Logging the Model with MLflow](#logging-the-model-with-mlflow)
-9. [Testing and Validation](#testing-and-validation)
-10. [Deploying to Model Serving](#deploying-to-model-serving)
-11. [Common Pitfalls and Solutions](#common-pitfalls-and-solutions)
-12. [Best Practices Summary](#best-practices-summary)
+3. [Workflow Overview](#workflow-overview)
+4. [Setting Up the Environment](#setting-up-the-environment)
+
+### Part 2: Model Development
+5. [Creating the Custom PyFunc Model](#creating-the-custom-pyfunc-model)
+6. [Implementing the Preprocessing Pipeline](#implementing-the-preprocessing-pipeline)
+7. [Implementing the Predict Method](#implementing-the-predict-method)
+8. [Solving the Serialization Challenge](#solving-the-serialization-challenge)
+
+### Part 3: Model Logging and Testing
+9. [Logging the Model with MLflow](#logging-the-model-with-mlflow)
+10. [Testing and Validation](#testing-and-validation)
+
+### Part 4: Production Deployment
+11. [Deploying to Model Serving](#deploying-to-model-serving)
+    - [Creating Endpoints (4 Methods)](#creating-model-serving-endpoint-and-deploying)
+    - [Making Inference Requests](#model-inference)
+    - [Alternative Inference Methods](#alternative-methods-for-making-inference-requests)
+12. [Monitoring Model Serving](#monitoring-model-serving)
+13. [Monitoring with AI Gateway Inference Tables](#monitoring-model-serving-with-ai-gateway-inference-tables)
+    - [Enabling Inference Tables](#inference-tables-for-payload-logging)
+    - [Analyzing Inference Data](#analyzing-inference-data)
+    - [Best Practices for Inference Tables](#best-practices-for-inference-tables)
+
+### Part 5: Best Practices and Troubleshooting
+14. [Common Pitfalls and Solutions](#common-pitfalls-and-solutions)
+15. [Best Practices Summary](#best-practices-summary)
+16. [Conclusion](#conclusion)
+17. [Next Steps](#next-steps)
 
 ## What You'll Learn
 
@@ -36,9 +56,12 @@ By the end of this tutorial, you'll master:
 
 - **Custom PyFunc Implementation**: How to wrap complex models using `mlflow.pyfunc.PythonModel`
 - **Artifact Management**: Best practices for logging and loading model artifacts
-- **Parameter Handling**: Working with MLflow's new parameter syntax and type restrictions
+- **Parameter Handling**: Working with MLflow's parameter syntax and type restrictions
 - **Data Serialization**: Solving complex serialization challenges for model serving
-- **Production Deployment**: Deploying to Databricks Model Serving endpoints
+- **Multiple Deployment Methods**: Four different ways to create and deploy model serving endpoints
+- **AI Gateway Integration**: Enabling AI Gateway-enabled inference tables for enhanced monitoring
+- **Production Monitoring**: Setting up comprehensive monitoring and alerting systems
+- **Production Deployment**: End-to-end deployment to Databricks Model Serving with best practices
 
 ## Understanding ScGPT and the Challenge
 
@@ -1304,7 +1327,7 @@ Regardless of which method you choose, the serving endpoint automatically provid
 - **Authentication**: Token-based access control
 - **Versioning**: Support for A/B testing and blue-green deployments
 
-### Model Inference
+## Model Inference
 
 Once your serving endpoint is deployed and ready, you can make inference requests via HTTP POST calls.
 
@@ -1460,16 +1483,18 @@ Databricks Model Serving provides multiple ways to query your deployed models, e
 
 - **Databricks Notebooks**: Direct Python/Scala/R integration within Databricks notebooks for interactive data science and ML workflows.
 
-For detailed examples and code snippets for each method, refer to the [Databricks Model Serving documentation](https://learn.microsoft.com/en-us/azure/databricks/machine-learning/model-serving/score-custom-model-endpoints).
+For detailed examples and code snippets for each method, refer to the [Query serving endpoints for custom models
+](https://learn.microsoft.com/en-us/azure/databricks/machine-learning/model-serving/score-custom-model-endpoints).
 
-# Monitoring Model Serving
 
-There is a whole section on monitoring Mosaic AI model serving in the [Databricks Model Serving documentation](https://docs.databricks.com/aws/en/machine-learning/model-serving/monitor-diagnose-endpoints). Serving ScGPT falls under the Mosaic AI model serving category. Here we will show the examples of:  
+## Monitoring Model Serving
+
+There is a whole section on monitoring Mosaic AI model serving in the [Monitor model quality and endpoint health](https://docs.databricks.com/aws/en/machine-learning/model-serving/monitor-diagnose-endpoints). Serving ScGPT falls under the Mosaic AI model serving category. Here we will show the examples of:  
 1. **monitoring and debugging the endpoint.**  
 2. **monitoring and analyzing the inference data.**
 
 
-**Monitoring and Debugging of Endpoint:**
+### Monitoring and Debugging of Endpoint
 
 ```python
 # Check endpoint status
@@ -1490,11 +1515,11 @@ if 'logs' in endpoint_info:
     print(f"Recent Logs: {endpoint_info['logs']}")
 ```
 
-## Monitoring Model Serving with Inference Tables
+### Monitoring Model Serving with AI Gateway Inference Tables
 
-Effective monitoring is critical for maintaining reliable model serving in production. Databricks provides built-in inference tables that automatically log all requests and responses, enabling you to track performance, debug issues, and analyze model behavior over time.
+Effective monitoring is critical for maintaining reliable model serving in production. Databricks' AI Gateway provides enhanced inference tables that automatically log all requests and responses with additional governance features, cost tracking, and user attribution. This section covers how to enable and leverage these capabilities for comprehensive production monitoring.
 
-### Inference Tables for Payload Logging
+#### Inference Tables for Payload Logging
 
 Inference tables automatically capture every request and response sent to your serving endpoint, storing them in Delta tables for analysis and auditing. This is essential for production monitoring, compliance, and debugging.
 
@@ -1602,7 +1627,7 @@ w.serving_endpoints.update_config(
 print("✓ AI Gateway-enabled inference table enabled for existing endpoint")
 ```
 
-### Analyzing Inference Data
+#### Analyzing Inference Data
 
 Once AI Gateway-enabled inference tables are enabled, you can query the logged data for monitoring and analysis. The AI Gateway inference tables include enhanced fields for better monitoring and governance.
 
@@ -1718,7 +1743,7 @@ error_analysis = spark.sql(f"""
 display(error_analysis)
 ```
 
-### Best Practices for Inference Tables
+#### Best Practices for Inference Tables
 
 1. **Use AI Gateway**: Enable AI Gateway-enabled inference tables for new deployments to get enhanced monitoring and cost tracking
 2. **Enable Early**: Turn on inference tables during initial endpoint creation
@@ -1729,7 +1754,8 @@ display(error_analysis)
 7. **Compliance**: Leverage logged data for audit trails and regulatory requirements
 8. **Cost Tracking**: Monitor usage metrics enabled by AI Gateway to optimize resource allocation
 
-**Migration Note for Legacy Inference Tables:**
+
+#### Migration Note for Legacy Inference Tables
 
 If you have existing endpoints using legacy `InferenceTableConfig`, you can migrate to AI Gateway-enabled inference tables:
 
@@ -1777,6 +1803,8 @@ sparse_matrix = adata.X  # scipy.sparse.csr_matrix
 sparse_list = adata.X.toarray().tolist()  # List of lists
 ```
 
+**Why it matters**: Model serving endpoints require all data to be JSON-serializable for HTTP transport.
+
 ### 2. Parameter Type Errors
 **Problem**: `MlflowException: Failed to enforce schema of data`
 
@@ -1788,6 +1816,8 @@ params = {"nested": {"key": "value"}}
 # Right
 params = {"key": "value"}  # Flat dictionary only
 ```
+
+**Why it matters**: MLflow's signature validation enforces strict type checking for model parameters.
 
 ### 3. Dimension Misalignment
 **Problem**: Broadcasting errors when reconstructing DataFrames
@@ -1801,6 +1831,8 @@ pd.DataFrame({'col': value})
 pd.DataFrame({'col': [value]})  # Note the brackets
 ```
 
+**Why it matters**: Model serving expects a single-row DataFrame structure for batch processing.
+
 ### 4. Missing Dependencies
 **Problem**: Model fails to load due to missing packages
 
@@ -1809,18 +1841,101 @@ pd.DataFrame({'col': [value]})  # Note the brackets
 conda_env = {
     'dependencies': [
         'python=3.11.11',
-        {'pip': ['scgpt==0.2.4', 'flash-attn==2.5.8']}
+        {'pip': ['scgpt==0.2.4', 'flash-attn==2.5.8+cu118']}
     ]
 }
 ```
+
+**Why it matters**: Inconsistent package versions between dev and prod cause runtime errors.
+
+### 5. AI Gateway Configuration Errors
+**Problem**: `Error: auto_capture_config and inference_table_config cannot both be set`
+
+**Solution**: Use only AI Gateway-enabled inference tables (the new approach):
+```python
+# Wrong - mixing old and new configs
+config = EndpointCoreConfigInput(
+    served_entities=[...],
+    inference_table_config=InferenceTableConfig(...),  # Legacy
+    auto_capture_config=AiGatewayConfig(...)  # New
+)
+
+# Right - use only AI Gateway config
+config = EndpointCoreConfigInput(
+    served_entities=[...],
+    auto_capture_config=AiGatewayConfig(
+        inference_table_config=AiGatewayInferenceTableConfig(...)
+    )
+)
+```
+
+**Why it matters**: Legacy and AI Gateway configurations are mutually exclusive.
+
+### 6. Inference Table Query Errors
+**Problem**: Column `timestamp` or `request_id` not found in AI Gateway inference tables
+
+**Solution**: Use the updated AI Gateway schema:
+```python
+# Wrong - using legacy schema
+query = f"""
+    SELECT request_id, timestamp, ...
+    FROM {catalog}.{schema}.inference_payload
+"""
+
+# Right - using AI Gateway schema
+query = f"""
+    SELECT databricks_request_id, request_time, ...
+    FROM {catalog}.{schema}.inference_payload
+"""
+```
+
+**Why it matters**: AI Gateway uses a different schema with renamed columns.
+
+### 7. Endpoint Creation Timeout
+**Problem**: Endpoint takes too long to initialize or gets stuck in "NOT_READY" state
+
+**Solution**: Check endpoint status and wait for readiness:
+```python
+from databricks.sdk import WorkspaceClient
+
+w = WorkspaceClient()
+
+# Create endpoint
+endpoint = w.serving_endpoints.create(...)
+
+# Wait for endpoint to be ready (with timeout)
+w.serving_endpoints.wait_get_serving_endpoint_not_updating(
+    endpoint.name,
+    timeout=timedelta(minutes=30)
+)
+```
+
+**Why it matters**: Large models can take 10-15 minutes to load. Always implement proper waiting logic.
+
+### 8. GPU Resource Errors
+**Problem**: `Error: No GPU available` or out-of-memory errors during inference
+
+**Solution**: Specify appropriate workload type and size:
+```python
+ServedEntityInput(
+    entity_name=model_name,
+    workload_type="GPU_SMALL",  # or GPU_MEDIUM, GPU_LARGE
+    workload_size="Medium",      # Adjust based on model size
+    scale_to_zero_enabled=False  # Keep endpoint warm for consistent latency
+)
+```
+
+**Why it matters**: ScGPT requires GPU for reasonable inference times. Wrong sizing leads to OOM or slow performance.
 
 ## Best Practices Summary
 
 ### Development Best Practices
 - **Start Simple**: Begin with a minimal working example before adding complexity
-- **Test Locally**: Always test your PyFunc model locally before logging
-- **Version Control**: Use clear versioning for your models and track changes
-- **Documentation**: Document your preprocessing steps and parameter meanings
+- **Test Locally**: Always test your PyFunc model locally before logging with `pyfunc.load_model()`
+- **Validate Serving Input**: Use `convert_input_example_to_serving_input()` and `validate_serving_input()` before deploying
+- **Version Control**: Use clear versioning for your models and track changes in Unity Catalog
+- **Documentation**: Document your preprocessing steps, parameter meanings, and model behavior
+- **Iterative Testing**: Test serialization → logging → loading → prediction in sequence
 
 ### Production Best Practices
 - **Environment Consistency**: Use identical package versions across dev/prod
@@ -1845,11 +1960,13 @@ The key takeaways are:
 3. **Parameter-driven preprocessing** enables flexible inference workflows
 4. **Thorough testing** prevents deployment issues
 
+
+
 ## Next Steps
 
 While this blog is comprehensive, it is not exhaustive. Ready to deploy your own foundation models? Here are some recommended next steps:
 
-- **Explore the Complete Notebook**: Check out our [full implementation notebook](https://github.com/databricks-ia/scgpt-mlflow-blog-post/blob/main/scgpt_mlflow_blog_post.ipynb) with working code
+- **Explore the Complete Notebook**: Check out our [full implementation notebook](https://github.com/databricks-ia/scgpt-mlflow-blog-post/blob/main/scgpt_mlflow_blog_post.ipynb) with working code (place holder for link here, will update later)
 - **Vibe coding leveraging this Blog Post**: The quickest way to deploy your own foundation models is to reference this blog post in your vibe coding tool. Make sure you also learn through the blog post to understand the concepts and patterns.
 - **Try Different Models**: Apply these patterns to other foundation models like [Geneformer](https://huggingface.co/ctheodoris/Geneformer) or [scBERT](https://www.nature.com/articles/s42256-022-00534-z)
 - **Mosaic AI Model Serving**: Learn about [other Mosaic AI model serving patterns](https://docs.databricks.com/en/machine-learning/model-serving/index.html) for multi-model endpoints
