@@ -7,7 +7,7 @@ date: "2025-10-28"
 tags: ["MLflow", "Foundation Models", "Model Serving", "ScGPT", "Databricks", "Machine Learning"]
 ---
 
-# Deploying ScGPT Foundation Models with MLflow: A Complete Guide to Custom PyFunc Models and Model Serving
+# Deploying ScGPT Foundation Models with MLflow: A Comprehensive Guide to Custom PyFunc Models and Model Serving
 
 ## Introduction
 
